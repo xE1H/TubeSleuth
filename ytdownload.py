@@ -108,10 +108,12 @@ def dl(yt, stream, audio=False, res=None):
     # Check if file exists, then just send it
     if audio:
         path = str(yt.video_id) + ".mp3"
+        if doesExist(path):
+            return path, yt.title + ".mp3"
     else:
         path = str(yt.video_id) + res + "audio." + stream.subtype
-    if doesExist(path):
-        return path
+        if doesExist(path):
+            return path, yt.title + "." + stream.subtype
 
     if audio:
         # Download audio
@@ -135,7 +137,8 @@ def dl(yt, stream, audio=False, res=None):
 
         # Combine audio and video with ffmpeg
         outPath = "./downloads/" + str(yt.video_id) + "-" + res + "-audio.mp4"
-        os.system("ffmpeg -i " + videoPath + " -i " + audioPath + " -c copy -c:a aac -strict experimental -hide_banner -loglevel error " + outPath)
+        os.system(
+            "ffmpeg -i " + videoPath + " -i " + audioPath + " -c copy -c:a aac -strict experimental -hide_banner -loglevel error " + outPath)
         scheduleRm(outPath)  # Schedule final file to be deleted
 
         return outPath, yt.title + "." + stream.subtype
