@@ -109,11 +109,11 @@ def dl(yt, stream, audio=False, res=None):
     if audio:
         path = str(yt.video_id) + ".mp3"
         if doesExist(path):
-            return path, yt.title + ".mp3"
+            return "./downloads/" + path, yt.title + ".mp3"
     else:
         path = str(yt.video_id) + res + "audio." + stream.subtype
         if doesExist(path):
-            return path, yt.title + "." + stream.subtype
+            return "./downloads/" + path, yt.title + "." + stream.subtype
 
     if audio:
         # Download audio
