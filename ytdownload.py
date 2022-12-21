@@ -120,7 +120,7 @@ def dl(yt, stream, audio=False, res=None):
 
         # Use ffmpeg to convert audio (usually webm) to mp3
         mp3path = "./downloads/" + str(yt.video_id) + ".mp3"
-        os.system("ffmpeg -i " + audioPath + " -acodec libmp3lame -ab 128k " + mp3path)
+        os.system("ffmpeg -i " + audioPath + " -acodec libmp3lame -ab 128k -hide_banner -loglevel error " + mp3path)
         scheduleRm(mp3path)  # Schedule file to be deleted
 
         return mp3path, yt.title + ".mp3"
@@ -135,7 +135,7 @@ def dl(yt, stream, audio=False, res=None):
 
         # Combine audio and video with ffmpeg
         outPath = "./downloads/" + str(yt.video_id) + "-" + res + "-audio.mp4"
-        os.system("ffmpeg -i " + videoPath + " -i " + audioPath + " -c copy -c:a aac -strict experimental " + outPath)
+        os.system("ffmpeg -i " + videoPath + " -i " + audioPath + " -c copy -c:a aac -strict experimental -hide_banner -loglevel error " + outPath)
         scheduleRm(outPath)  # Schedule final file to be deleted
 
         return outPath, yt.title + "." + stream.subtype
