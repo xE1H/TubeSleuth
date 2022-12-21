@@ -1,0 +1,133 @@
+body {
+    background-color: rgb(32, 33, 36);
+    margin: auto;
+    padding: 50px;
+    height: 100%;
+    font-family: "Montserrat", sans-serif;
+}
+
+.search {
+    max-width: 500px;
+    margin: auto;
+    display: block;
+}
+
+.input-search {
+    background-color: rgb(32, 33, 36);
+    border-color: rgb(80, 80, 80);
+    color: rgb(80, 80, 80);
+    transition: 0.2s;
+}
+
+.input-search::placeholder {
+    color: rgb(80, 80, 80);
+}
+
+.input-search:hover::placeholder, .input-search:focus::placeholder {
+    color: white;
+    transition: 0.2s;
+}
+
+.input-search:hover, .input-search:focus {
+    background-color: rgb(52, 53, 56);
+    color: white;
+    transition: 0.2s;
+}
+
+
+.button-search {
+    background-color: rgb(32, 33, 36);
+    border-color: rgb(80, 80, 80);
+    transition: 0.2s;
+    color: rgb(80, 80, 80);
+}
+
+.button-search:hover, .button-search:focus {
+    background-color: rgb(52, 53, 56) !important;
+    border-color: rgb(80, 80, 80);
+    transition: 0.2s;
+}
+
+.center-screen {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: center;
+    min-height: 40vh;
+    margin-top: 40vh;
+}
+
+#loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -0px;
+    margin-left: -50px;
+    width: 100px;
+    height: 10px;
+    z-index: 101;
+    transition: 0.2s;
+}
+
+#dim {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    margin: 0;
+    opacity: 0%;
+    transition: 0.2s;
+}
+
+#video-info {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -0px;
+    margin-left: -250px;
+    justify-content: left;
+    text-align: left;
+    width: 500px;
+}
+
+.thumbnail {
+    width: 150px;
+    display: block;
+    border-radius: 8px;
+    border: 1px solid rgb(80, 80, 80);
+}
+
+.video-desc {
+    color: rgb(80, 80, 80);
+    margin-left: 10px;
+}
+
+.video-title {
+    color: rgb(100, 100, 100);
+    font-weight: 500;
+}
+
+.video-length {
+    font-size: 15px;
+    margin-top: 0px;
+}
+
+.cmenu {
+    background-color: rgb(52, 53, 56) !important;
+    border-color: rgb(80, 80, 80);
+    transition: 0.2s;
+    width: 50px;
+}
+
+a {
+    color: white !important;
+    transition: 0.2s;
+}
+
+a:hover {
+    color: rgb(80, 80, 80) !important;
+    transition: 0.2s;
+}
