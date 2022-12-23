@@ -5,6 +5,11 @@ from pytube import YouTube
 # YouTube Downloader
 # xE1H, 2022
 
+# TODO: rewrite scheduleRm
+# TODO: rewrite doesExist
+# TODO: cache YouTube objects
+# TODO: delete files on startup (cleanup)
+
 # Look for ffmpeg in PATH or local dir
 if "ffmpeg" not in os.listdir():
     try:
@@ -29,18 +34,18 @@ def getInfo(url):
     formats = []  # {"format": f.subtype, "resolution": f.resolution}
 
     # Sort by resolution
-    for f in streams:
+    for stream in streams:
         duplicate = False
         for format in formats:
-            if f.resolution == format["resolution"]:
+            if stream.resolution == format["resolution"]:
                 duplicate = True
         if not duplicate:
-            formats.append({"format": f.subtype, "resolution": f.resolution})
+            formats.append({"format": stream.subtype, "resolution": stream.resolution})
 
     return yt.title, yt.length, yt.thumbnail_url, formats
 
 
-def download(url, resolution):
+def downloadVideo(url, resolution):
     """
     Download a video
     :param url: url of the video
@@ -49,10 +54,10 @@ def download(url, resolution):
     """
     yt = YouTube(url)
     # Only look for mp4
-    stream = yt.streams.filter(mime_type="video/mp4", progressive=False).desc()
-    for f in stream:
-        if f.resolution == resolution:
-            return dl(yt, f, audio=False, res=resolution)
+    streams = yt.streams.filter(mime_type="video/mp4", progressive=False).desc()
+    for stream in streams:
+        if stream.resolution == resolution:
+            return download(yt, stream, audio=False, res=resolution)
 
 
 def downloadAudio(url):
@@ -63,7 +68,7 @@ def downloadAudio(url):
     """
     yt = YouTube(url)
     stream = yt.streams.filter(only_audio=True).desc().first()
-    return dl(yt, stream, audio=True)
+    return download(yt, stream, audio=True)
 
 
 def scheduleRm(path):
@@ -72,8 +77,8 @@ def scheduleRm(path):
     :param path:
     :return:
     """
-    t = Timer(1800.0, os.remove, [path])
-    t.start()
+    thead = Timer(1800.0, os.remove, [path])
+    thead.start()
 
 
 def doesExist(path, stream=None):
@@ -95,7 +100,7 @@ def doesExist(path, stream=None):
             return False
 
 
-def dl(yt, stream, audio=False, res=None):
+def download(yt, stream, audio=False, res=None):
     """
     Download a video
     :param yt: YouTube object
@@ -111,7 +116,7 @@ def dl(yt, stream, audio=False, res=None):
         if doesExist(path):
             return "./downloads/" + path, yt.title + ".mp3"
     else:
-        path = str(yt.video_id) + res + "audio." + stream.subtype
+        path = str(yt.video_id) + "-" + res + "-av." + stream.subtype
         if doesExist(path):
             return "./downloads/" + path, yt.title + "." + stream.subtype
 
@@ -136,7 +141,7 @@ def dl(yt, stream, audio=False, res=None):
                               yt.streams.filter(only_audio=True).desc().first())
 
         # Combine audio and video with ffmpeg
-        outPath = "./downloads/" + str(yt.video_id) + "-" + res + "-audio.mp4"
+        outPath = "./downloads/" + str(yt.video_id) + "-" + res + "-av.mp4"
         os.system(
             "ffmpeg -i " + videoPath + " -i " + audioPath + " -c copy -c:a aac -strict experimental -hide_banner -loglevel error " + outPath)
         scheduleRm(outPath)  # Schedule final file to be deleted

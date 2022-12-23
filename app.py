@@ -26,7 +26,7 @@ def download():
     if format == "audio":
         path, filename = yt.downloadAudio(url)
     else:
-        path, filename = yt.download(url, format)
+        path, filename = yt.downloadVideo(url, format)
     return send_file(path, as_attachment=True, download_name=filename)
 
 
