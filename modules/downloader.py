@@ -12,7 +12,7 @@ class Downloader:
     def __init__(self, config):
         self.config = config
         self.dlPath = config["downloads"]["downloadDir"]
-        self.fileTimeout = config["downloads"]["deleteAfter"]
+        self.fileTimeout = float(config["downloads"]["deleteAfter"])
 
         # Look for ffmpeg in PATH or local dir
         if "ffmpeg" not in os.listdir():
@@ -26,8 +26,9 @@ class Downloader:
             os.mkdir(self.dlPath)
 
         # Delete files on startup
-        for file in os.listdir(self.dlPath):
-            os.remove(os.path.join(self.dlPath, file))
+        if self.fileTimeout > 0:
+            for file in os.listdir(self.dlPath):
+                os.remove(os.path.join(self.dlPath, file))
 
     @staticmethod
     def getInfo(url):
@@ -139,7 +140,7 @@ class Downloader:
         :return:
         """
         for p in path:
-            thead = Timer(float(self.fileTimeout), self.removeFile, [p])
+            thead = Timer(self.fileTimeout, self.removeFile, [p])
             thead.start()
 
     def doesExist(self, path):
