@@ -60,6 +60,12 @@ class Downloader:
         :return: Video filename
         """
         yt = YouTube(url)
+
+        # Check if video already exists, maybe downloaded recently / cached
+        path = str(yt.video_id) + "-" + resolution + "-av.mp4"
+        if self.doesExist(path):
+            return os.path.join(self.dlPath, path), yt.title + ".mp4"
+
         # Only look for mp4
         streams = yt.streams
         videoStream = None
@@ -67,10 +73,6 @@ class Downloader:
         for s in streams.filter(mime_type="video/mp4", progressive=False).desc():
             if s.resolution == resolution:
                 videoStream = s
-
-        path = str(yt.video_id) + "-" + resolution + "-av.mp4"
-        if self.doesExist(path):
-            return os.path.join(self.dlPath, path), yt.title + ".mp4"
 
         # Download video (without audio)
         videoPath = self.downloadIfNotExists(str(yt.video_id) + "-" + resolution + "-video." + videoStream.subtype,
@@ -97,11 +99,13 @@ class Downloader:
         :return: audio filename
         """
         yt = YouTube(url)
-        stream = yt.streams.filter(only_audio=True).desc().first()
 
+        # Check if audio already exists, maybe downloaded recently / cached
         outPath = str(yt.video_id) + ".mp3"
         if self.doesExist(outPath):
             return os.path.join(self.dlPath, outPath), yt.title + ".mp3"
+
+        stream = yt.streams.filter(only_audio=True).desc().first()
 
         # Download audio
         audioPath = self.downloadIfNotExists(str(yt.video_id) + "." + stream.subtype, stream)
