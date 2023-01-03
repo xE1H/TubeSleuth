@@ -11,7 +11,7 @@ from pytube import YouTube
 class Downloader:
     def __init__(self, config):
         self.config = config
-        self.path = config["downloads"]["downloadDir"]
+        self.dlPath = config["downloads"]["downloadDir"]
         self.fileTimeout = config["downloads"]["deleteAfter"]
 
         # Look for ffmpeg in PATH or local dir
@@ -22,12 +22,12 @@ class Downloader:
                 raise Exception("* ffmpeg not found in PATH or local dir.")
 
         # Create download directory if it doesn't exist
-        if not os.path.exists(self.path):
-            os.mkdir(self.path)
+        if not os.path.exists(self.dlPath):
+            os.mkdir(self.dlPath)
 
         # Delete files on startup
-        for file in os.listdir(self.path):
-            os.remove(os.path.join(self.path, file))
+        for file in os.listdir(self.dlPath):
+            os.remove(os.path.join(self.dlPath, file))
 
     @staticmethod
     def getInfo(url):
@@ -62,32 +62,33 @@ class Downloader:
         yt = YouTube(url)
         # Only look for mp4
         streams = yt.streams
-        stream = None
+        videoStream = None
 
         for s in streams.filter(mime_type="video/mp4", progressive=False).desc():
             if s.resolution == resolution:
-                stream = s
+                videoStream = s
 
-        path = str(yt.video_id) + "-" + resolution + "-av." + stream.subtype
+        path = str(yt.video_id) + "-" + resolution + "-av.mp4"
         if self.doesExist(path):
-            return os.path.join(self.path, path), yt.title + "." + stream.subtype
+            return os.path.join(self.dlPath, path), yt.title + ".mp4"
 
         # Download video (without audio)
-        videoPath = self.downloadIfNotExists(str(yt.video_id) + resolution + "." + stream.subtype, stream)
+        videoPath = self.downloadIfNotExists(str(yt.video_id) + "-" + resolution + "-video." + videoStream.subtype,
+                                             videoStream)
 
         # Download audio
-        audioPath = self.downloadIfNotExists(str(yt.video_id) + "." + stream.subtype,
-                                             streams.filter(only_audio=True).desc().first())
+        audioStream = streams.filter(only_audio=True).desc().first()
+        audioPath = self.downloadIfNotExists(str(yt.video_id) + "-audio." + audioStream.subtype, audioStream)
 
         # Combine audio and video with ffmpeg
-        outPath = os.path.join(self.path, str(yt.video_id) + "-" + resolution + "-av.mp4")
+        outPath = os.path.join(self.dlPath, path)
         subprocess.check_output(
             "ffmpeg -i " + videoPath + " -i " + audioPath + " -c copy -c:a aac -strict experimental -hide_banner -loglevel error " + outPath,
             shell=True)
 
         self.scheduleRm({videoPath, audioPath, outPath})
 
-        return outPath, yt.title + "." + stream.subtype
+        return outPath, yt.title + ".mp4"
 
     def downloadAudio(self, url):
         """
@@ -97,15 +98,16 @@ class Downloader:
         """
         yt = YouTube(url)
         stream = yt.streams.filter(only_audio=True).desc().first()
-        path = str(yt.video_id) + ".mp3"
-        if self.doesExist(path):
-            return os.path.join(self.path, path), yt.title + ".mp3"
+
+        outPath = str(yt.video_id) + ".mp3"
+        if self.doesExist(outPath):
+            return os.path.join(self.dlPath, outPath), yt.title + ".mp3"
 
         # Download audio
         audioPath = self.downloadIfNotExists(str(yt.video_id) + "." + stream.subtype, stream)
 
         # Use ffmpeg to convert audio (usually webm) to mp3
-        mp3path = os.path.join(self.path, str(yt.video_id) + ".mp3")
+        mp3path = os.path.join(self.dlPath, outPath)
         subprocess.check_output(
             "ffmpeg -i " + audioPath + " -acodec libmp3lame -ab 128k -hide_banner -loglevel error " + mp3path,  # NOQA
             shell=True)
@@ -132,8 +134,9 @@ class Downloader:
         :param path: path of file in downloads folder
         :return:
         """
-        thead = Timer(float(self.fileTimeout), self.removeFile, [path])
-        thead.start()
+        for p in path:
+            thead = Timer(float(self.fileTimeout), self.removeFile, [p])
+            thead.start()
 
     def doesExist(self, path):
         """
@@ -141,7 +144,7 @@ class Downloader:
         :param path:
         :return:
         """
-        if path in os.listdir(self.path):
+        if path in os.listdir(self.dlPath):
             return True
         else:
             return False
@@ -156,4 +159,4 @@ class Downloader:
         if self.doesExist(path):
             return path
         else:
-            return stream.download(output_path=self.path, filename=path)
+            return stream.download(output_path=self.dlPath, filename=path)
